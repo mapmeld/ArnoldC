@@ -1,0 +1,13 @@
+body {
+  font-family: arial;
+  padding: 50px;
+  font-size: 12pt;
+  background: #eee;
+}
+.cm-s-default .cm-number {
+  color: #f00;
+}
+.outputter {
+  background: #000;
+  color: lightgreen;
+}
