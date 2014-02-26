@@ -63,7 +63,7 @@ function execute_code(code_mirror){
     return obtained;
   };
   
-  for(var line_num=1; line_num<lines.length-1; line_num++){
+  var run_line_num = function(line_num){
     line_dom = $(lines[line_num]);
     line_text = line_dom.text().trim();
     line_print_num = line_num + 1;
@@ -79,7 +79,7 @@ function execute_code(code_mirror){
 
         if(var_to_assign !== null || var_to_name !== null){
           console.log( "In the middle of assigning or naming a variable at line " + line_print_num );
-          break;
+          return;
         }
 
         // valid print statement?
@@ -89,7 +89,7 @@ function execute_code(code_mirror){
           // check quotes are on string, then remove them
           if(str[0] != '"' || str[str.length-1] != '"'){
             console.log("Uncontained string at line " + line_print_num);
-            break;
+            return;
           }
           str = str.substring(1).substring(0, str.length-2);
           console.log( str );
@@ -98,7 +98,7 @@ function execute_code(code_mirror){
           var meant_value = obtainValue(line_dom.children()[4], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             console.log(meant_value.value);
@@ -116,7 +116,7 @@ function execute_code(code_mirror){
 
         if(var_to_assign !== null || var_to_name !== null){
           console.log( "In the middle of assigning a variable at line " + line_print_num );
-          break;
+          return;
         }
         
         var varname = $(line_dom.children()[3]).text();
@@ -128,7 +128,7 @@ function execute_code(code_mirror){
         else{
           // variable already declared
           console.log("variable " + varname + " was initialised before line " + line_print_num);
-          break;
+          return;
         }
       }
     }
@@ -143,22 +143,22 @@ function execute_code(code_mirror){
         
         if(var_to_name === null){
           console.log("Use HEY CHRISTMAS TREE to initialise a variable before setting its value on line " + line_print_num );
-          break;
+          return;
         }
         if(var_to_assign !== null){
           console.log( "In the middle of assigning a variable at line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[4].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[4], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_name] = meant_value.value;
@@ -177,8 +177,8 @@ function execute_code(code_mirror){
         && line_dom.children()[4].className == "cm-variable"){
 
         if(var_to_name !== null){
-          console.log( "Currently naming a variable at line " + line_print_num );
-          break;
+          console.log( "In the middle of naming a variable at line " + line_print_num );
+          return;
         }
         
         var varname = $(line_dom.children()[4]).text();
@@ -187,7 +187,7 @@ function execute_code(code_mirror){
         }
         else{
           console.log( "In the middle of assigning another variable before line " + line_print_num );
-          break;
+          return;
         }
       }
     }
@@ -202,18 +202,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[4].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[4], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = meant_value.value;
@@ -226,7 +226,7 @@ function execute_code(code_mirror){
     if(line_text == "ENOUGH TALK"){
       if(var_to_assign === null){
         console.log( "no variable to finish assigning at line " + line_print_num );
-        break;
+        return;
       }
       var_to_assign = null;
     }
@@ -240,18 +240,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[2].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[2], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] += meant_value.value;
@@ -268,18 +268,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[2].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[2], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] -= meant_value.value;
@@ -297,18 +297,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[3].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[3], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] *= meant_value.value;
@@ -327,18 +327,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[4].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[4], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = Math.round(known_vars[var_to_assign] / meant_value.value);
@@ -361,18 +361,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[7].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[7], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = (known_vars[var_to_assign] == meant_value.value) * 1;
@@ -392,18 +392,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[5].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[5], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = (known_vars[var_to_assign] > meant_value.value) * 1;
@@ -422,18 +422,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
         if( line_dom.children()[4].className == "cm-string" ){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[4], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = !(!(known_vars[var_to_assign] || meant_value.value)) * 1;
@@ -450,18 +450,18 @@ function execute_code(code_mirror){
 
         if(var_to_assign === null){
           console.log("Use GET TO THE CHOPPER and HERE IS MY INVITATION to start assigning a variable before line " + line_print_num );
-          break;
+          return;
         }
 
-        if( line_dom.children()[2].className == "cm-string" ){
+        if(line_dom.children()[2].className == "cm-string"){
           console.log( "Variables can only be integers (check line " + line_print_num + ")" );
-          break;
+          return;
         }
         else{
           var meant_value = obtainValue(line_dom.children()[2], line_dom, line_print_num);
           if(meant_value.error){
             console.log(meant_value.error);
-            break;
+            return;
           }
           else{
             known_vars[var_to_assign] = !(!(known_vars[var_to_assign] && meant_value.value)) * 1;
@@ -470,5 +470,7 @@ function execute_code(code_mirror){
       }
     }
 
-  }
+    run_line_num(line_num+1);
+  };
+  run_line_num(1);
 }
