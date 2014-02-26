@@ -10,14 +10,22 @@ CodeMirror.defineMode("ruby", function(config) {
     "TALK TO THE HAND",
     "HEY CHRISTMAS TREE",
     "YOU SET US UP",
+    "GET TO THE CHOPPER",
+    "HERE IS MY INVITATION",
+    "GET UP",
+    "GET DOWN",
+    "YOU'RE FIRED",
+    "HE HAD TO SPLIT",
     "@I LIED",
     "@NO PROBLEMO"
   ]);
   var indentWords = wordObj([
-    "SHOWTIME"
+    "SHOWTIME",
+    "CHOPPER"
   ]);
   var dedentWords = wordObj([
-    "TERMINATED"
+    "TERMINATED",
+    "ENOUGH"
   ]);
   var matching = {}; //{"[": "]", "{": "}", "(": ")"};
   var curPunc;
