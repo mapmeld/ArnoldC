@@ -20,18 +20,22 @@ CodeMirror.defineMode("ruby", function(config) {
     "@NO PROBLEMO",
     "BULLSHIT",
     "BECAUSE I'M GOING TO SAY PLEASE",
-    "YOU HAVE NO RESPECT FOR LOGIC"
+    "YOU HAVE NO RESPECT FOR LOGIC",
+    "STICK AROUND",
+    "CHILL"
   ]);
   var indentWords = wordObj([
     "SHOWTIME",
     "CHOPPER",
-    "PLEASE"
+    "PLEASE",
+    "AROUND"
   ]);
   var dedentWords = wordObj([
     "TERMINATED",
     "ENOUGH",
     "BULLSHIT",
-    "RESPECT"
+    "RESPECT",
+    "CHILL"
   ]);
   var matching = {}; //{"[": "]", "{": "}", "(": ")"};
   var curPunc;

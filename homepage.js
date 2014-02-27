@@ -8,8 +8,9 @@ myCodeMirror.setValue("IT'S SHOWTIME\nYOU HAVE BEEN TERMINATED");
 var lastcode = myCodeMirror.getValue();
 var refreshTimeout = null;
 setInterval(function(){
-  if(lastcode != myCodeMirror.getValue()){
-    lastcode = myCodeMirror.getValue();
+  var currentcode = myCodeMirror.getValue();
+  if(lastcode != currentcode){
+    lastcode = currentcode;
     window.clearTimeout(refreshTimeout);
     refreshTimeout = setTimeout(function(){
       $(".outputter").html("");

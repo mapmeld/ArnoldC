@@ -65,7 +65,7 @@ function execute_code(code_mirror){
 
     // skip content in blocks (for example, lines inside an IF when the condition is false)
     var deepest_scope = app_stack[app_stack.length-1];
-    if(app_stack.indexOf("if-skip") > -1 || app_stack.indexOf("else-skip") > -1){
+    if(app_stack.indexOf("if-skip") > -1 || app_stack.indexOf("else-skip") > -1 || app_stack.indexOf("while-skip") > -1){
       if(deepest_scope == "if-skip" || deepest_scope == "else-skip"){
         if(line_text.indexOf("YOU HAVE NO RESPECT FOR LOGIC") > -1){
           if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "YOU"
@@ -76,8 +76,8 @@ function execute_code(code_mirror){
             && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "LOGIC"
             && line_dom.children().length == 6){
             
-            // end of the if statement
-            scope.pop();
+            // end of the if block
+            app_stack.pop();
           }
         }
         else if(line_text.indexOf("BULLSHIT") > -1){
@@ -86,7 +86,7 @@ function execute_code(code_mirror){
             console.log("multiple BULLSHIT blocks starting at line " + line_print_num);
             return;
           }
-          if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BULLSHIT"
+          if(line_dom.children()[0].className == "cm-keyword" && $(line_dom.children()[0]).text() == "BULLSHIT"
             && line_dom.children().length == 1){
             
             // switch to executing commands in the else statement
@@ -118,8 +118,37 @@ function execute_code(code_mirror){
           && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "LOGIC"
           && line_dom.children().length == 6){
             
-          // end of this if statement
-          scope.pop();
+          // end of this if block
+          app_stack.pop();
+        }
+      }
+
+      if(deepest_scope == "while-skip"){
+        if(line_text.indexOf("CHILL") > -1){
+          if(line_dom.children()[0].className == "cm-keyword" && $(line_dom.children()[0]).text() == "CHILL"
+            && line_dom.children().length == 1){
+            
+            // end of the while block
+            app_stack.pop();
+          }
+        }
+      }
+
+      // if you see another while statement, add a deeper level
+      // this means we associate the correct end-while with its while statement
+      if(line_text.indexOf("STICK AROUND") > -1){
+        if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "STICK"
+          && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "AROUND"
+          && line_dom.children().length > 2){
+            app_stack.push("while");
+        }
+      }
+      else if(deepest_scope != "while-skip" && line_text.indexOf("CHILL") > -1){
+        if(line_dom.children()[0].className == "cm-keyword" && $(line_dom.children()[0]).text() == "CHILL"
+          && line_dom.children().length == 1){
+
+          // end of this while block
+          app_stack.pop();
         }
       }
 
@@ -565,14 +594,64 @@ function execute_code(code_mirror){
     if(line_text.indexOf("BULLSHIT") > -1){
       if(deepest_scope == "else"){
         // too much bullshit
-        console.log("multiple BULLSHIT blocks starting at line " + line_print_num);
+        console.log("multiple BULLSHIT blocks detected at line " + line_print_num);
         return;
       }
-      if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BULLSHIT"
+      else if(deepest_scope != "if"){
+        // too much bullshit
+        console.log("BULLSHIT must be in a conditional block - check line " + line_print_num);
+        return;
+      }
+      if(line_dom.children()[0].className == "cm-keyword" && $(line_dom.children()[0]).text() == "BULLSHIT"
         && line_dom.children().length == 1){
             
         // switch to executing commands in the else statement
         app_stack[ app_stack.length-1 ] = "else-skip";
+      }
+    }
+
+    // start while
+    if(line_text.indexOf("STICK AROUND") > -1){
+      if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "STICK"
+        && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "AROUND"
+        && line_dom.children().length > 2){
+
+        if(line_dom.children()[2].className == "cm-string"){
+          console.log( "STICK AROUND expects integer or variable (check line " + line_print_num + ")" );
+          return;
+        }
+        else{
+          var meant_value = obtainValue(line_dom.children()[2], line_dom, line_print_num);
+          if(meant_value.error){
+            console.log(meant_value.error);
+            return;
+          }
+          else{
+            if(meant_value.value){
+              app_stack.push("while-" + line_num);
+            }
+            else{
+              app_stack.push("while-skip");            
+            }
+          }
+        }
+      }
+    }
+
+    // we reach this if we are running code in a while block
+    if(line_text.indexOf("CHILL") > -1){
+      if(line_dom.children()[0].className == "cm-keyword" && $(line_dom.children()[0]).text() == "CHILL"
+        && line_dom.children().length == 1){
+        
+        if(deepest_scope.indexOf("while-") == -1){
+          console.log("CHILL must end a STICK AROUND block - check line " + line_print_num);
+          return;
+        }
+
+        // jump back to beginning to re-evaluate
+        var while_start = deepest_scope.split("-")[1] * 1;
+        app_stack.pop();
+        return run_line_num(while_start);
       }
     }
 
