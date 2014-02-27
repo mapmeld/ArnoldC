@@ -271,6 +271,10 @@ function execute_code(code_mirror){
         
         var varname = $(line_dom.children()[4]).text();
         if(var_to_assign === null){
+          if(known_vars[varname] === undefined){
+            console.log( "Use HEY CHRISTMAS TREE to initialise a variable before assigning it in line " + line_print_num );
+            return;
+          }
           var_to_assign = varname;
         }
         else{
