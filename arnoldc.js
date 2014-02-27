@@ -17,15 +17,21 @@ CodeMirror.defineMode("ruby", function(config) {
     "YOU'RE FIRED",
     "HE HAD TO SPLIT",
     "@I LIED",
-    "@NO PROBLEMO"
+    "@NO PROBLEMO",
+    "BULLSHIT",
+    "BECAUSE I'M GOING TO SAY PLEASE",
+    "YOU HAVE NO RESPECT FOR LOGIC"
   ]);
   var indentWords = wordObj([
     "SHOWTIME",
-    "CHOPPER"
+    "CHOPPER",
+    "PLEASE"
   ]);
   var dedentWords = wordObj([
     "TERMINATED",
-    "ENOUGH"
+    "ENOUGH",
+    "BULLSHIT",
+    "RESPECT"
   ]);
   var matching = {}; //{"[": "]", "{": "}", "(": ")"};
   var curPunc;

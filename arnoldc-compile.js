@@ -20,6 +20,7 @@ function execute_code(code_mirror){
   var known_functions = { };
   var var_to_name = null;
   var var_to_assign = null;
+  var app_stack = ["program"];
 
   var obtainValue = function(lineWord, lineDom, line_print_num){
     var obtained = { };
@@ -47,26 +48,84 @@ function execute_code(code_mirror){
     else if( lineWord.className == "cm-tag" ){
       // could be a preset value
       var valname = $(lineWord).text();
-      if(valname == "@I" && line_dom.children().length > 5){
-        valname = $(line_dom.children()[5]).text();
-        if(valname == "LIED"){
-          obtained.value = 0;
-        }
+      if(valname == "@I" && line_dom.text().indexOf("@I LIED") == line_dom.text().indexOf("@I")){
+        obtained.value = 0;
       }
-      else if(valname == "@NO" && line_dom.children().length > 5){
-        valname = $(line_dom.children()[5]).text();
-        if(valname == "PROBLEMO"){
-          obtained.value = 1;
-        }
+      else if(valname == "@NO" && line_dom.text().indexOf("@NO PROBLEMO") == line_dom.text().indexOf("@NO")){
+        obtained.value = 1;
       }
     }
     return obtained;
   };
-  
+
   var run_line_num = function(line_num){
     line_dom = $(lines[line_num]);
     line_text = line_dom.text().trim();
     line_print_num = line_num + 1;
+
+    // skip content in blocks (for example, lines inside an IF when the condition is false)
+    var deepest_scope = app_stack[app_stack.length-1];
+    if(app_stack.indexOf("if-skip") > -1 || app_stack.indexOf("else-skip") > -1){
+      if(deepest_scope == "if-skip" || deepest_scope == "else-skip"){
+        if(line_text.indexOf("YOU HAVE NO RESPECT FOR LOGIC") > -1){
+          if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "YOU"
+            && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "HAVE"
+            && line_dom.children()[2].className == "cm-tag" && $(line_dom.children()[2]).text() == "NO"
+            && line_dom.children()[3].className == "cm-tag" && $(line_dom.children()[3]).text() == "RESPECT"
+            && line_dom.children()[4].className == "cm-tag" && $(line_dom.children()[4]).text() == "FOR"
+            && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "LOGIC"
+            && line_dom.children().length == 6){
+            
+            // end of the if statement
+            scope.pop();
+          }
+        }
+        else if(line_text.indexOf("BULLSHIT") > -1){
+          if(deepest_scope == "else-skip"){
+            // too much bullshit
+            console.log("multiple BULLSHIT blocks starting at line " + line_print_num);
+            return;
+          }
+          if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BULLSHIT"
+            && line_dom.children().length == 1){
+            
+            // switch to executing commands in the else statement
+            app_stack[ app_stack.length-1 ] = "else";
+          }
+        }
+      }
+
+      // if you see another if statement, add a deeper level
+      // this means we associate the correct end-if with its if statement
+      if(line_text.indexOf("BECAUSE I'M GOING TO SAY PLEASE") > -1){
+        if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BECAUSE"
+          && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "I"
+          && line_dom.children()[2].className == "cm-tag" && $(line_dom.children()[2]).text() == "M"
+          && line_dom.children()[3].className == "cm-tag" && $(line_dom.children()[3]).text() == "GOING"
+          && line_dom.children()[4].className == "cm-tag" && $(line_dom.children()[4]).text() == "TO"
+          && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "SAY"
+          && line_dom.children()[6].className == "cm-tag" && $(line_dom.children()[6]).text() == "PLEASE"
+          && line_dom.children().length > 7){
+            app_stack.push("if");
+        }
+      }
+      else if(deepest_scope != "if-skip" && line_text.indexOf("YOU HAVE NO RESPECT FOR LOGIC") > -1){
+        if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "YOU"
+          && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "HAVE"
+          && line_dom.children()[2].className == "cm-tag" && $(line_dom.children()[2]).text() == "NO"
+          && line_dom.children()[3].className == "cm-tag" && $(line_dom.children()[3]).text() == "RESPECT"
+          && line_dom.children()[4].className == "cm-tag" && $(line_dom.children()[4]).text() == "FOR"
+          && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "LOGIC"
+          && line_dom.children().length == 6){
+            
+          // end of this if statement
+          scope.pop();
+        }
+      }
+
+      // continue to next line without executing stuff
+      return run_line_num(line_num + 1);
+    }
 
     // print
     if(line_text.indexOf("TALK TO THE HAND") > -1){
@@ -347,7 +406,6 @@ function execute_code(code_mirror){
       }
     }
 
-
     // operand for equal
     if(line_text.indexOf("YOU ARE NOT YOU YOU ARE ME") > -1){
       if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "YOU"
@@ -470,6 +528,55 @@ function execute_code(code_mirror){
       }
     }
 
+    // start conditional
+    if(line_text.indexOf("BECAUSE I'M GOING TO SAY PLEASE") > -1){
+      if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BECAUSE"
+        && line_dom.children()[1].className == "cm-tag" && $(line_dom.children()[1]).text() == "I"
+        && line_dom.children()[2].className == "cm-tag" && $(line_dom.children()[2]).text() == "M"
+        && line_dom.children()[3].className == "cm-tag" && $(line_dom.children()[3]).text() == "GOING"
+        && line_dom.children()[4].className == "cm-tag" && $(line_dom.children()[4]).text() == "TO"
+        && line_dom.children()[5].className == "cm-tag" && $(line_dom.children()[5]).text() == "SAY"
+        && line_dom.children()[6].className == "cm-tag" && $(line_dom.children()[6]).text() == "PLEASE"
+        && line_dom.children().length > 7){
+        
+        if(line_dom.children()[7].className == "cm-string"){
+          console.log( "BECAUSE I'M GOING TO SAY PLEASE expects integer or variable (check line " + line_print_num + ")" );
+          return;
+        }
+        else{
+          var meant_value = obtainValue(line_dom.children()[7], line_dom, line_print_num);
+          if(meant_value.error){
+            console.log(meant_value.error);
+            return;
+          }
+          else{
+            if(meant_value.value){
+              app_stack.push("if");
+            }
+            else{
+              app_stack.push("if-skip");            
+            }
+          }
+        }
+      }
+    }
+
+    // we reach this if we are running code in an if block, then we see an else that we want to skip
+    if(line_text.indexOf("BULLSHIT") > -1){
+      if(deepest_scope == "else"){
+        // too much bullshit
+        console.log("multiple BULLSHIT blocks starting at line " + line_print_num);
+        return;
+      }
+      if(line_dom.children()[0].className == "cm-tag" && $(line_dom.children()[0]).text() == "BULLSHIT"
+        && line_dom.children().length == 1){
+            
+        // switch to executing commands in the else statement
+        app_stack[ app_stack.length-1 ] = "else-skip";
+      }
+    }
+
+    // no unusual movement in control - advance to next line
     run_line_num(line_num+1);
   };
   run_line_num(1);
