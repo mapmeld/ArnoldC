@@ -57,8 +57,12 @@ function execute_code(code_mirror){
     }
     return obtained;
   };
-
+  
   var run_line_num = function(line_num){
+    if (line_num >= lines.length) {
+      console.log('Overran program length');
+      return;
+    }
     line_dom = $(lines[line_num]);
     line_text = line_dom.text().trim();
     line_print_num = line_num + 1;
