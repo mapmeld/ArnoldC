@@ -9,11 +9,9 @@ function execute_code(code_mirror){
   // verify start and end
   if( $(lines[0]).text().trim() != "IT'S SHOWTIME" ){
     console.log("missing IT'S SHOWTIME on first line");
-    return;
   }
   if( $(lines[lines.length-1]).text().trim() != "YOU HAVE BEEN TERMINATED" ){
     console.log("missing YOU HAVE BEEN TERMINATED on last line");
-    return;
   }
 
   var known_vars = { };
@@ -60,7 +58,6 @@ function execute_code(code_mirror){
   
   var run_line_num = function(line_num){
     if (line_num >= lines.length) {
-      console.log('Overran program length');
       return;
     }
     line_dom = $(lines[line_num]);
